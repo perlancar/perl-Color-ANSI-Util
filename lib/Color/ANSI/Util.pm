@@ -246,7 +246,9 @@ where R, G, B are decimal values.
 
 =head1 BUGS/NOTES
 
-Algorithm currently not very efficient.
+Algorithm for finding closest indexed color from RGB color currently not very
+efficient. Probably can add some threshold square distance, below which we can
+shortcut to the final answer.
 
 
 =head1 SEE ALSO
