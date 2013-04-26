@@ -1,5 +1,24 @@
 Revision history for Color-ANSI-Util
 
+0.02    2013-04-26 (SHARYANTO)
+
+        [INCOMPATIBLE CHANGES]
+
+        - ansi16_to_rgb() now expects numbers from 0-15 instead of 30-37; it no
+          longer supports accepting things like "31;1".
+
+        - rgb_to_ansi16() now returns number from 0-15 instead of 30-37 or
+          things like "31;1".
+
+        [ENHANCEMENTS]
+
+        - Add functions to generate ANSI escape codes:
+          rgb_to_ansi{16,256}_{fg,bg}_code (with their short aliases).
+
+        - Add functions to generate 24-bit ANSI escape codes (supported by
+          Konsole and Yakuake).
+
+
 0.01    2013-04-25 (SHARYANTO)
 
         First release.
