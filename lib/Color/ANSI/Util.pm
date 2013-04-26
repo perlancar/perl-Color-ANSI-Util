@@ -8,9 +8,23 @@ require Exporter;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(
                        ansi16_to_rgb
-                       ansi256_to_rgb
                        rgb_to_ansi16
+                       rgb_to_ansi16_fg_code
+                       ansi16fg
+                       rgb_to_ansi16_bg_code
+                       ansi16bg
+
+                       ansi256_to_rgb
                        rgb_to_ansi256
+                       rgb_to_ansi256_fg_code
+                       ansi256fg
+                       rgb_to_ansi256_bg_code
+                       ansi256bg
+
+                       rgb_to_ansi24b_fg_code
+                       ansi24bfg
+                       rgb_to_ansi24b_bg_code
+                       ansi24bbg
                );
 
 # VERSION
@@ -93,13 +107,11 @@ for (sort {$a<=>$b} keys %ansi256) {
 sub ansi16_to_rgb {
     my ($input) = @_;
 
-    if ($input =~ /^(\d+)(?:;(\d+))?$/) {
-        if ($1 >= 40 && $1 <= 47) {
-            return $ansi16{$1-40 + (defined($2) && $2 eq '1' ? 8:0)};
-        } elsif ($1 >= 30 && $1 <= 37) {
-            return $ansi16{$1-30 + (defined($2) && $2 eq '1' ? 8:0)};
+    if ($input =~ /^\d+$/) {
+        if ($input >= 0 && $input <= 15) {
+            return $ansi16{$input + 0}; # to remove prefix zero e.g. "06"
         } else {
-            die "Invalid ANSI-16 color number '$input'";
+            die "Invalid ANSI 16-color number '$input'";
         }
     } elsif ($input =~ /^(?:(bold|bright) \s )?
                         (black|red|green|yellow|blue|magenta|cyan|white)$/ix) {
@@ -125,7 +137,7 @@ sub ansi16_to_rgb {
         $i += 8 if $bold;
         return $ansi16{$i};
     } else {
-        die "Invalid ANSI-16 color name '$input'";
+        die "Invalid ANSI 16-color name '$input'";
     }
 }
 
@@ -153,28 +165,81 @@ sub _rgb_to_indexed {
     return $res;
 }
 
-sub rgb_to_ansi16 {
-    my ($input) = @_;
-    my $res = _rgb_to_indexed($input, \@revansi16);
-    if ($res >= 8) {
-        return ($res+30-8) . ";1";
-    } else {
-        return $res+30;
-    }
-}
-
 sub ansi256_to_rgb {
     my ($input) = @_;
 
     $input += 0;
-    exists($ansi256{$input}) or die "Invalid ANSI-256 color index '$input'";
+    exists($ansi256{$input}) or die "Invalid ANSI 256-color index '$input'";
     $ansi256{$input};
+}
+
+sub rgb_to_ansi16 {
+    my ($input) = @_;
+    _rgb_to_indexed($input, \@revansi16);
 }
 
 sub rgb_to_ansi256 {
     my ($input) = @_;
     _rgb_to_indexed($input, \@revansi256);
 }
+
+sub rgb_to_ansi16_fg_code {
+    my ($input) = @_;
+
+    my $res = _rgb_to_indexed($input, \@revansi16);
+    return "\e[" . ($res >= 8 ? ($res+30-8) . ";1" : ($res+30)) . "m";
+}
+
+sub ansi16fg  { goto &rgb_to_ansi16_fg_code  }
+
+sub rgb_to_ansi16_bg_code {
+    my ($input) = @_;
+
+    my $res = _rgb_to_indexed($input, \@revansi16);
+    return "\e[" . ($res >= 8 ? ($res+40-8) : ($res+40)) . "m";
+}
+
+sub ansi16bg  { goto &rgb_to_ansi16_bg_code  }
+
+sub rgb_to_ansi256_fg_code {
+    my ($input) = @_;
+
+    my $res = _rgb_to_indexed($input, \@revansi16);
+    return "\e[38;5;${res}m";
+}
+
+sub ansi256fg { goto &rgb_to_ansi256_fg_code }
+
+sub rgb_to_ansi256_bg_code {
+    my ($input) = @_;
+
+    my $res = _rgb_to_indexed($input, \@revansi16);
+    return "\e[48;5;${res}m";
+}
+
+sub ansi256bg { goto &rgb_to_ansi256_bg_code }
+
+sub rgb_to_ansi24b_fg_code {
+    my ($rgb) = @_;
+
+    return sprintf("\e[38;2;%d;%d;%dm",
+                   hex(substr($rgb, 0, 2)),
+                   hex(substr($rgb, 2, 2)),
+                   hex(substr($rgb, 4, 2)));
+}
+
+sub ansi24bfg { goto &rgb_to_ansi24b_fg_code }
+
+sub rgb_to_ansi24b_bg_code {
+    my ($rgb) = @_;
+
+    return sprintf("\e[48;2;%d;%d;%dm",
+                   hex(substr($rgb, 0, 2)),
+                   hex(substr($rgb, 2, 2)),
+                   hex(substr($rgb, 4, 2)));
+}
+
+sub ansi24bbg { goto &rgb_to_ansi24b_bg_code }
 
 1;
 # ABSTRACT: Routines for dealing with ANSI colors
@@ -186,23 +251,47 @@ sub rgb_to_ansi256 {
      ansi256_to_rgb
      rgb_to_ansi16
      rgb_to_ansi256
+     rgb_to_ansi16_fg_code
+     ansi16fg
+     rgb_to_ansi16_bg_code
+     ansi16bg
+     rgb_to_ansi256_fg_code
+     ansi256fg
+     rgb_to_ansi256_bg_code
+     ansi256bg
  );
 
- # convert ANSI-16 color to RGB
- say ansi16_to_rgb("31");       # => "800000" (red)
+ # convert ANSI 16-color index to RGB
+ say ansi16_to_rgb(1);          # => "800000" (red)
  say ansi16_to_rgb("red");      # => "800000" (ditto)
- say ansi16_to_rgb("31;1");     # => "ff0000" (red bold)
+ say ansi16_to_rgb(9);          # => "ff0000" (red bold)
  say ansi16_to_rgb("bold red"); # => "ff0000" (ditto)
 
- # convert RGB to ANSI-16
- say ansi16_to_rgb("ac0405");    # => "31" (closest to red)
- say ansi16_to_rgb("f01010");    # => "31;1" (closest to bold red)
+ # convert RGB to ANSI 16-color index
+ say ansi16_to_rgb("ac0405");    # => 1 (closest to red)
+ say ansi16_to_rgb("f01010");    # => 9 (closest to bold red)
 
- # convert ANSI-256 color to RGB
+ # convert RGB to ANSI 16-color escape code for setting foreground color
+ say rgb_to_ansi16_fg_code("ac0405"); # => "\e[31m"
+ say ansi16fg("f01010");              # => "\e[31;1m" (shorter alias)
+
+ # ditto but for background color (bgcolor actually only supports 0-7)
+ say rgb_to_ansi16_bg_code("ac0405"); # => "\e[41m"
+ say ansi16bg("f01010");              # => "\e[41m" (shorter alias)
+
+ # convert ANSI 256-color index to RGB
  say ansi256_to_rgb(204);        # => "ff5f87"
 
- # convert RGB to ANSI-256 color
+ # convert RGB to ANSI 256-color index
  say rgb_to_ansi256("ff5f88");   # => 204 (closest)
+
+ # convert RGB to ANSI 256-color escape code for setting foreground color
+ say rgb_to_ansi256_fg_code("ff5f87"); # => "\e[38;5;204m"
+ say ansi256fg("ff5f87");              # => "\e[38;5;204m" (shorter alias)
+
+ # ditto but for background color (bgcolor actually only supports 0-7)
+ say rgb_to_ansi256_bg_code("ff5f87"); # => "\e[48;5;204m"
+ say ansi256bg("ff5f87");              # => "\e[48;5;204m" (shorter alias)
 
 
 =head1 DESCRIPTION
@@ -216,32 +305,75 @@ Keywords: xterm, xterm-256color, terminal
 
 =head2 ansi16_to_rgb($color) => STR
 
-Convert ANSI-16 color to RGB. C<$color> can be 30-37, or "30;1" to "37;1" (for
-bold), or color names "black", "red", "green", "yellow", "blue", "magenta",
-"cyan", "white" with "bold" to indicate bold/bright.
+Convert ANSI-16 color to RGB. C<$color> is number from 0-15, or color names
+"black", "red", "green", "yellow", "blue", "magenta", "cyan", "white" with
+"bold" to indicate bold/bright. Return 6-hexdigit, e.g. "ff00cc".
 
-=head2 rgb_to_ansi16($color) => STR
+Die on invalid input.
 
-Convert RGB to ANSI-16 color. C<$color> is 6-hexdigit RGB color like "abcdef".
-Will pick the closest color. Return color in the form that is convenient for
-printing ANSI escape code to set foreground color, e.g. "31", "31;1" (when
-printed as color code, "\e[31m" or "\e[31;1m"). To set background color, add
-decimal 10 value to the first number, e.g. "\e[41m" or "\e[41;1m".
+=head2 rgb_to_ansi16($color) => INT
+
+Convert RGB to ANSI-16 color. C<$color> is 6-hexdigit RGB color like "ff00cc".
+Will pick the closest color. Return number from 0-15.
+
+Die on invalid input.
 
 =head2 ansi256_to_rgb($color) => STR
 
-Convert ANSI-256 color to RGB. C<$color> is a number from 0-255.
+Convert ANSI-256 color to RGB. C<$color> is a number from 0-255. Return
+6-hexdigit, e.g. "ff00cc".
 
-=head2 rgb_to_ansi256($color) => STR
+Die on invalid input.
 
-Convert RGB to ANSI-256 color. C<$color> is 6-hexdigit RGB color like "abcdef".
-Will pick the closest color. Return number between 0-255. Note: to print ANSI
-escape code to set foreground color, use: "\e[38;5;<color>m" and to set
-background color: "\e[48;5;<color>m".
+=head2 rgb_to_ansi256($color) => INT
 
-BTW, ANSI code to set RGB foreground color (supported by Konsole/Yakuake):
-"\e[38;2;<R>;<G>;<B>m" and to set RGB background color: "\e[48;2;<R>;<G>;<B>m",
-where R, G, B are decimal values.
+Convert RGB to ANSI-256 color. C<$color> is 6-hexdigit RGB color like "ff00cc".
+Will pick the closest color. Return number between 0-255.
+
+Die on invalid input.
+
+=head2 rgb_to_ansi16_fg_code($rgb) => STR
+
+=head2 ansi16fg($rgb) => STR
+
+Alias for rgb_to_ansi16_fg_code().
+
+=head2 rgb_to_ansi16_bg_code($rgb) => STR
+
+=head2 ansi16bg($rgb) => STR
+
+Alias for rgb_to_ansi16_bg_code().
+
+=head2 rgb_to_ansi256_fg_code($rgb) => STR
+
+=head2 ansi256fg($rgb) => STR
+
+Alias for rgb_to_ansi256_fg_code().
+
+=head2 rgb_to_ansi256_bg_code($rgb) => STR
+
+=head2 ansi256bg($rgb) => STR
+
+Alias for rgb_to_ansi256_bg_code().
+
+=head2 rgb_to_ansi24b_fg_code($rgb) => STR
+
+Return ANSI escape code to set 24bit foreground color. Supported by Konsole and
+Yakuake.
+
+=head2 ansi24bfg($rgb) => STR
+
+Alias for rgb_to_ansi24b_fg_code().
+
+=head2 rgb_to_ansi24b_bg_code($rgb) => STR
+
+Return ANSI escape code to set 24bit background color. Supported by Konsole and
+Yakuake.
+
+=head2 ansi24bbg($rgb) => STR
+
+Alias for rgb_to_ansi24b_bg_code().
+
 
 
 =head1 BUGS/NOTES
