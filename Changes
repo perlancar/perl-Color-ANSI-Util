@@ -1,5 +1,13 @@
 Revision history for Color-ANSI-Util
 
+0.03    2013-04-28 (SHARYANTO)
+
+        [ENHANCEMENTS]
+
+        - Add functions: detect_color_depth, rgb_to_ansi_{fg,bg}_code,
+          ansi{fg,bg}.
+
+
 0.02    2013-04-26 (SHARYANTO)
 
         [INCOMPATIBLE CHANGES]

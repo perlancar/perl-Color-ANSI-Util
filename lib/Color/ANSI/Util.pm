@@ -437,17 +437,19 @@ Alias for rgb_to_ansi24b_bg_code().
 
 Return ANSI escape code to set 24bit/256/16 foreground color (which color depth
 used is determined by C<COLOR_DEPTH> environment setting or the latest
-detect_color_depth() result).
+detect_color_depth() result). In other words, this function automatically
+chooses rgb_to_ansi{24b,256,16}_fg_code().
 
 =head2 ansifg($rgb) => STR
 
 Alias for rgb_to_ansi_fg_code().
 
-=head2 rgb_to_ansi24b_bg_code($rgb) => STR
+=head2 rgb_to_ansi_bg_code($rgb) => STR
 
 Return ANSI escape code to set 24bit/256/16 background color (which color depth
 used is determined by C<COLOR_DEPTH> environment setting or the latest
-detect_color_depth() result).
+detect_color_depth() result). In other words, this function automatically
+chooses rgb_to_ansi{24b,256,16}_bg_code().
 
 =head2 ansibg($rgb) => STR
 
