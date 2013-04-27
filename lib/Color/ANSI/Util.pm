@@ -25,6 +25,13 @@ our @EXPORT_OK = qw(
                        ansi24bfg
                        rgb_to_ansi24b_bg_code
                        ansi24bbg
+
+                       rgb_to_ansi_fg_code
+                       ansifg
+                       rgb_to_ansi_bg_code
+                       ansibg
+
+                       detect_color_depth
                );
 
 # VERSION
@@ -241,6 +248,58 @@ sub rgb_to_ansi24b_bg_code {
 
 sub ansi24bbg { goto &rgb_to_ansi24b_bg_code }
 
+
+my $cd_cache;
+sub detect_color_depth {
+    my $cd;
+    if ($ENV{KONSOLE_DBUS_SERVICE} || $ENV{KONSOLE_DBUS_SESSION}) {
+        # assume konsole is recent version and support 24bit color
+        $cd = 2**24;
+    } elsif (($ENV{TERM} // "") =~ /256color/) {
+        $cd = 256;
+    } else {
+        $cd = 16;
+    }
+    $cd_cache = $cd;
+    $cd;
+}
+
+sub rgb_to_ansi_fg_code {
+    my ($rgb) = @_;
+    my $cd = $ENV{COLOR_DEPTH};
+    unless (defined $cd) {
+        detect_color_depth() unless defined $cd_cache;
+        $cd = $cd_cache;
+    }
+    if ($cd >= 2**24) {
+        rgb_to_ansi24b_fg_code($rgb);
+    } elsif ($cd >= 256) {
+        rgb_to_ansi256_fg_code($rgb);
+    } else {
+        rgb_to_ansi16_fg_code($rgb);
+    }
+}
+
+sub ansifg { goto &rgb_to_ansi_fg_code }
+
+sub rgb_to_ansi_bg_code {
+    my ($rgb) = @_;
+    my $cd = $ENV{COLOR_DEPTH};
+    unless (defined $cd) {
+        detect_color_depth() unless defined $cd_cache;
+        $cd = $cd_cache;
+    }
+    if ($cd >= 2**24) {
+        rgb_to_ansi24b_bg_code($rgb);
+    } elsif ($cd >= 256) {
+        rgb_to_ansi256_bg_code($rgb);
+    } else {
+        rgb_to_ansi16_bg_code($rgb);
+    }
+}
+
+sub ansibg { goto &rgb_to_ansi_bg_code }
+
 1;
 # ABSTRACT: Routines for dealing with ANSI colors
 
@@ -374,6 +433,32 @@ Yakuake.
 
 Alias for rgb_to_ansi24b_bg_code().
 
+=head2 rgb_to_ansi_fg_code($rgb) => STR
+
+Return ANSI escape code to set 24bit/256/16 foreground color (which color depth
+used is determined by C<COLOR_DEPTH> environment setting or the latest
+detect_color_depth() result).
+
+=head2 ansifg($rgb) => STR
+
+Alias for rgb_to_ansi_fg_code().
+
+=head2 rgb_to_ansi24b_bg_code($rgb) => STR
+
+Return ANSI escape code to set 24bit/256/16 background color (which color depth
+used is determined by C<COLOR_DEPTH> environment setting or the latest
+detect_color_depth() result).
+
+=head2 ansibg($rgb) => STR
+
+Alias for rgb_to_ansi_bg_code().
+
+=head2 detect_color_depth() => INT
+
+Detect color depth.
+
+
+=head1 ENVIRONMENT
 
 
 =head1 BUGS/NOTES
@@ -381,6 +466,11 @@ Alias for rgb_to_ansi24b_bg_code().
 Algorithm for finding closest indexed color from RGB color currently not very
 efficient. Probably can add some threshold square distance, below which we can
 shortcut to the final answer.
+
+
+=head1 TODO
+
+Routine to convert ANSI escape code, e.g. C<\e[31;1m> into RGB value (ff0000).
 
 
 =head1 SEE ALSO

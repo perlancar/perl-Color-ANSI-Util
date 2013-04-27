@@ -24,6 +24,13 @@ use Color::ANSI::Util qw(
                            ansi24bfg
                            rgb_to_ansi24b_bg_code
                            ansi24bbg
+
+                           rgb_to_ansi_fg_code
+                           ansifg
+                           rgb_to_ansi_bg_code
+                           ansibg
+
+                           detect_color_depth
                     );
 
 subtest "16 colors" => sub {
@@ -55,6 +62,28 @@ subtest "24bit colors" => sub {
     is(ansi24bfg             ("fe0102"), "\e[38;2;254;1;2m");
     is(rgb_to_ansi24b_bg_code("7e0102"), "\e[48;2;126;1;2m");
     is(ansi24bbg             ("fe0102"), "\e[48;2;254;1;2m");
+};
+
+subtest "detect" => sub {
+    {
+        local $ENV{COLOR_DEPTH} = 2**24;
+        is(detect_color_depth(), 2**24);
+    }
+    {
+        local $ENV{COLOR_DEPTH};
+        local $ENV{KONSOLE_DBUS_SERVICE};
+        local $ENV{KONSOLE_DBUS_SESSION};
+        local $ENV{TERM} = 'xterm-256color';
+        is(detect_color_depth(), 256);
+    }
+
+    {
+        local $ENV{COLOR_DEPTH} = 256;
+        is(rgb_to_ansi_fg_code("7e0000"), "\e[38;5;1m");
+        is(ansifg             ("fe0000"), "\e[38;5;9m");
+        is(rgb_to_ansi_bg_code("7e0000"), "\e[48;5;1m");
+        is(ansibg             ("fe0000"), "\e[48;5;9m");
+    }
 };
 
 DONE_TESTING:
