@@ -1,5 +1,10 @@
 Revision history for Color-ANSI-Util
 
+0.05    2013-05-02 (SHARYANTO)
+
+        No functional changes. Fix wrong test (RT#84991).
+
+
 0.04    2013-04-28 (SHARYANTO)
 
         No functional changes. Add some POD text.
