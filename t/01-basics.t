@@ -66,7 +66,10 @@ subtest "24bit colors" => sub {
 
 subtest "detect" => sub {
     {
-        local $ENV{COLOR_DEPTH} = 2**24;
+        local $ENV{COLOR_DEPTH};
+        local $ENV{KONSOLE_DBUS_SERVICE} = 'some value';
+        local $ENV{KONSOLE_DBUS_SESSION} = 'some value';
+        local $ENV{TERM} = 'xterm';
         is(detect_color_depth(), 2**24);
     }
     {
