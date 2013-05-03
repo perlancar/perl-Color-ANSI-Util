@@ -4,6 +4,7 @@ use 5.010001;
 use strict;
 use warnings;
 
+use Term::Detect;
 use Test::More 0.98;
 use Color::ANSI::Util qw(
                            ansi16_to_rgb
@@ -66,10 +67,10 @@ subtest "24bit colors" => sub {
 
 subtest "detect" => sub {
     {
-        local $ENV{COLOR_DEPTH};
         local $ENV{KONSOLE_DBUS_SERVICE} = 'some value';
         local $ENV{KONSOLE_DBUS_SESSION} = 'some value';
         local $ENV{TERM} = 'xterm';
+        Color::ANSI::Util::_detect_terminal( Term::Detect::detect_terminal() );
         is(detect_color_depth(), 2**24);
     }
     {
@@ -77,6 +78,8 @@ subtest "detect" => sub {
         local $ENV{KONSOLE_DBUS_SERVICE};
         local $ENV{KONSOLE_DBUS_SESSION};
         local $ENV{TERM} = 'xterm-256color';
+        Color::ANSI::Util::_detect_terminal( Term::Detect::detect_terminal() );
+        undef $Color::ANSI::Util::cd_cache;
         is(detect_color_depth(), 256);
     }
 

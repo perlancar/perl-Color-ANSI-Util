@@ -248,20 +248,31 @@ sub rgb_to_ansi24b_bg_code {
 
 sub ansi24bbg { goto &rgb_to_ansi24b_bg_code }
 
-
-my $cd_cache;
-sub detect_color_depth {
-    my $cd;
-    if ($ENV{KONSOLE_DBUS_SERVICE} || $ENV{KONSOLE_DBUS_SESSION}) {
-        # assume konsole is recent version and support 24bit color
-        $cd = 2**24;
-    } elsif (($ENV{TERM} // "") =~ /256color/) {
-        $cd = 256;
-    } else {
-        $cd = 16;
+sub _detect_terminal {
+    state $cache;
+    if (@_) {
+        $cache = shift;
+    } elsif (!$cache) {
+        require Term::Detect;
+        $cache = Term::Detect::detect_terminal("p") // {};
     }
-    $cd_cache = $cd;
-    $cd;
+    $cache;
+}
+
+our $cd_cache;
+sub detect_color_depth {
+    unless (defined $cd_cache) {
+        my $terminfo = _detect_terminal();
+        if (defined $terminfo->{color_depth}) {
+            $cd_cache = $terminfo->{color_depth};
+        } elsif (($ENV{TERM} // "") =~ /256color/) {
+            $cd_cache = 256;
+        } else {
+            # assume 16 color for unknown terminal
+            $cd_cache = 16;
+        }
+    }
+    $cd_cache;
 }
 
 sub rgb_to_ansi_fg_code {
