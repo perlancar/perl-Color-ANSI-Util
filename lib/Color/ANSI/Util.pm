@@ -265,8 +265,6 @@ sub detect_color_depth {
         my $terminfo = _detect_terminal();
         if (defined $terminfo->{color_depth}) {
             $cd_cache = $terminfo->{color_depth};
-        } elsif (($ENV{TERM} // "") =~ /256color/) {
-            $cd_cache = 256;
         } else {
             # assume 16 color for unknown terminal
             $cd_cache = 16;
