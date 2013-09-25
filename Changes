@@ -1,23 +1,29 @@
 Revision history for Color-ANSI-Util
 
+0.08    2013-09-25 (SHARYANTO)
+
+        - No functional changes. Simplify Synopsis and show only the most
+          important functions.
+
+
 0.07    2013-05-03 (SHARYANTO)
 
-        No functional changes. Remove duplicate code.
+        - No functional changes. Remove duplicate code.
 
 
 0.06    2013-05-03 (SHARYANTO)
 
-        Use Term::Detect to detect color depth.
+        - Use Term::Detect to detect color depth.
 
 
 0.05    2013-05-02 (SHARYANTO)
 
-        No functional changes. Fix wrong test (RT#84991).
+        - No functional changes. Fix wrong test (RT#84991).
 
 
 0.04    2013-04-28 (SHARYANTO)
 
-        No functional changes. Add some POD text.
+        - No functional changes. Add some POD text.
 
 
 0.03    2013-04-28 (SHARYANTO)
@@ -49,4 +55,4 @@ Revision history for Color-ANSI-Util
 
 0.01    2013-04-25 (SHARYANTO)
 
-        First release.
+        - First release.
