@@ -4,6 +4,8 @@ use 5.010001;
 use strict;
 use warnings;
 
+use Term::Detect::Software qw(detect_terminal_cached);
+
 require Exporter;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(
@@ -30,8 +32,6 @@ our @EXPORT_OK = qw(
                        ansifg
                        rgb_to_ansi_bg_code
                        ansibg
-
-                       detect_color_depth
                );
 
 # VERSION
@@ -248,38 +248,15 @@ sub rgb_to_ansi24b_bg_code {
 
 sub ansi24bbg { goto &rgb_to_ansi24b_bg_code }
 
-sub _detect_terminal {
-    state $cache;
-    if (@_) {
-        $cache = shift;
-    } elsif (!$cache) {
-        require Term::Detect;
-        $cache = Term::Detect::detect_terminal("p") // {};
-    }
-    $cache;
-}
-
-our $cd_cache;
-sub detect_color_depth {
-    unless (defined $cd_cache) {
-        my $terminfo = _detect_terminal();
-        if (defined $terminfo->{color_depth}) {
-            $cd_cache = $terminfo->{color_depth};
-        } else {
-            # assume 16 color for unknown terminal
-            $cd_cache = 16;
-        }
-    }
-    $cd_cache;
+sub _color_depth {
+    state $cd = $ENV{COLOR_DEPTH} //
+        detect_terminal_cached()->{color_depth} // 16;
+    $cd;
 }
 
 sub rgb_to_ansi_fg_code {
     my ($rgb) = @_;
-    my $cd = $ENV{COLOR_DEPTH};
-    unless (defined $cd) {
-        detect_color_depth() unless defined $cd_cache;
-        $cd = $cd_cache;
-    }
+    state $cd = _color_depth();
     if ($cd >= 2**24) {
         rgb_to_ansi24b_fg_code($rgb);
     } elsif ($cd >= 256) {
@@ -293,11 +270,7 @@ sub ansifg { goto &rgb_to_ansi_fg_code }
 
 sub rgb_to_ansi_bg_code {
     my ($rgb) = @_;
-    my $cd = $ENV{COLOR_DEPTH};
-    unless (defined $cd) {
-        detect_color_depth() unless defined $cd_cache;
-        $cd = $cd_cache;
-    }
+    state $cd = _color_depth();
     if ($cd >= 2**24) {
         rgb_to_ansi24b_bg_code($rgb);
     } elsif ($cd >= 256) {
@@ -409,9 +382,9 @@ Alias for rgb_to_ansi24b_bg_code().
 =head2 rgb_to_ansi_fg_code($rgb) => STR
 
 Return ANSI escape code to set 24bit/256/16 foreground color (which color depth
-used is determined by C<COLOR_DEPTH> environment setting or the latest
-detect_color_depth() result). In other words, this function automatically
-chooses rgb_to_ansi{24b,256,16}_fg_code().
+used is determined by C<COLOR_DEPTH> environment setting or from
+L<Term::Detect::Software>). In other words, this function automatically chooses
+rgb_to_ansi{24b,256,16}_fg_code().
 
 =head2 ansifg($rgb) => STR
 
@@ -420,19 +393,13 @@ Alias for rgb_to_ansi_fg_code().
 =head2 rgb_to_ansi_bg_code($rgb) => STR
 
 Return ANSI escape code to set 24bit/256/16 background color (which color depth
-used is determined by C<COLOR_DEPTH> environment setting or the latest
-detect_color_depth() result). In other words, this function automatically
-chooses rgb_to_ansi{24b,256,16}_bg_code().
+used is determined by C<COLOR_DEPTH> environment setting or from
+Term::Detect::Software). In other words, this function automatically chooses
+rgb_to_ansi{24b,256,16}_bg_code().
 
 =head2 ansibg($rgb) => STR
 
 Alias for rgb_to_ansi_bg_code().
-
-=head2 detect_color_depth() => INT
-
-Detect color depth. Return either 2**24 (16777216), 256, or 16. Currently 24bit
-is determined by existence of Konsole environment variables, and 256 colors by
-detecting C<TERM> value of C<xterm-256color>. Otherwise, 16 colors is assumed.
 
 
 =head1 ENVIRONMENT
