@@ -4,7 +4,7 @@ use 5.010001;
 use strict;
 use warnings;
 
-use Term::Detect;
+use Term::Detect::Software;
 use Test::More 0.98;
 use Color::ANSI::Util qw(
                            ansi16_to_rgb
@@ -30,8 +30,6 @@ use Color::ANSI::Util qw(
                            ansifg
                            rgb_to_ansi_bg_code
                            ansibg
-
-                           detect_color_depth
                     );
 
 subtest "16 colors" => sub {
@@ -63,33 +61,6 @@ subtest "24bit colors" => sub {
     is(ansi24bfg             ("fe0102"), "\e[38;2;254;1;2m");
     is(rgb_to_ansi24b_bg_code("7e0102"), "\e[48;2;126;1;2m");
     is(ansi24bbg             ("fe0102"), "\e[48;2;254;1;2m");
-};
-
-subtest "detect" => sub {
-    {
-        local $ENV{KONSOLE_DBUS_SERVICE} = 'some value';
-        local $ENV{KONSOLE_DBUS_SESSION} = 'some value';
-        local $ENV{TERM} = 'xterm';
-        Color::ANSI::Util::_detect_terminal( Term::Detect::detect_terminal() );
-        is(detect_color_depth(), 2**24);
-    }
-    {
-        local $ENV{COLOR_DEPTH};
-        local $ENV{KONSOLE_DBUS_SERVICE};
-        local $ENV{KONSOLE_DBUS_SESSION};
-        local $ENV{TERM} = 'xterm-256color';
-        Color::ANSI::Util::_detect_terminal( Term::Detect::detect_terminal() );
-        undef $Color::ANSI::Util::cd_cache;
-        is(detect_color_depth(), 256);
-    }
-
-    {
-        local $ENV{COLOR_DEPTH} = 256;
-        is(rgb_to_ansi_fg_code("7e0000"), "\e[38;5;1m");
-        is(ansifg             ("fe0000"), "\e[38;5;9m");
-        is(rgb_to_ansi_bg_code("7e0000"), "\e[48;5;1m");
-        is(ansibg             ("fe0000"), "\e[48;5;9m");
-    }
 };
 
 DONE_TESTING:
