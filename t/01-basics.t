@@ -63,5 +63,37 @@ subtest "24bit colors" => sub {
     is(ansi24bbg             ("fe0102"), "\e[48;2;254;1;2m");
 };
 
+subtest "color detection (ENV)" => sub {
+    local $Color::ANSI::Util::_use_termdetsw = 0;
+    local $Color::ANSI::Util::_color_depth;
+    local $ENV{COLOR_DEPTH};
+
+    $Color::ANSI::Util::_color_depth = undef;
+    $ENV{COLOR_DEPTH} = 16;
+    is(ansifg("7e0102"), "\e[31m");
+
+    $Color::ANSI::Util::_color_depth = undef;
+    $ENV{COLOR_DEPTH} = 256;
+    is(ansifg("7e0102"), "\e[38;5;1m");
+
+    $Color::ANSI::Util::_color_depth = undef;
+    $ENV{COLOR_DEPTH} = 2**24;
+    is(ansifg("7e0102"), "\e[38;2;126;1;2m");
+};
+
+subtest "color detection (simple heuristic)" => sub {
+    local $Color::ANSI::Util::_use_termdetsw = 0;
+    local $Color::ANSI::Util::_color_depth;
+    local $ENV{COLOR_DEPTH};
+    local $ENV{KONSOLE_DBUS_SERVICE};
+
+    $Color::ANSI::Util::_color_depth = undef;
+    is(ansifg("7e0102"), "\e[31m");
+
+    $Color::ANSI::Util::_color_depth = undef;
+    $ENV{KONSOLE_DBUS_SERVICE} = 1;
+    is(ansifg("7e0102"), "\e[38;2;126;1;2m");
+};
+
 DONE_TESTING:
 done_testing();
