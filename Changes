@@ -1,5 +1,13 @@
 Revision history for Color-ANSI-Util
 
+0.12    2014-04-08 (SHARYANTO)
+
+	- No functional changes.
+
+        - [Bugfix] Forgot to remove 'use Term::Detect::Software' statement in
+          test file [CT].
+
+
 0.11    2014-04-07 (SHARYANTO)
 
 	- Make dependency to Term::Detect::Software optional so this module is
