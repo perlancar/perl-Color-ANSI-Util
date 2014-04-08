@@ -4,7 +4,6 @@ use 5.010001;
 use strict;
 use warnings;
 
-use Term::Detect::Software;
 use Test::More 0.98;
 use Color::ANSI::Util qw(
                            ansi16_to_rgb
