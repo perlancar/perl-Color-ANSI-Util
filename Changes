@@ -1,5 +1,13 @@
 Revision history for Color-ANSI-Util
 
+0.13    2014-08-06 (SHARYANTO)
+
+	- No functional changes.
+
+        - Expand Synopsis and description to make it clearer what this module
+          does.
+
+
 0.12    2014-04-08 (SHARYANTO)
 
 	- No functional changes.
