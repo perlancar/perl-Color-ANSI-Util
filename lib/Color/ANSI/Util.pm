@@ -1,5 +1,8 @@
 package Color::ANSI::Util;
 
+# DATE
+# VERSION
+
 use 5.010001;
 use strict;
 use warnings;
@@ -31,8 +34,6 @@ our @EXPORT_OK = qw(
                        rgb_to_ansi_bg_code
                        ansibg
                );
-
-# VERSION
 
 my %ansi16 = (
     0  => '000000',
@@ -312,8 +313,14 @@ sub ansibg { goto &rgb_to_ansi_bg_code }
      ansibg
  );
 
- say ansifg("f01010"); # => "\e[31;1m" (on 16-color terminal)
- say ansibg("ff5f87"); # => "\e[48;5;204m" (on 256-color terminal)
+ say ansifg("f0c010"); # => "\e[33;1m" (on 16-color terminal)
+                       # => "\e[38;5;11m" (on 256-color terminal)
+                       # => "\e[38;2;240;192;16m" (on 24-bit-color terminal)
+
+ say ansibg("ff5f87"); # => "\e[47m" (on 16-color terminal)
+                       # => "\e[48;5;7m" (on 256-color terminal)
+                       # => "\e[48;2;255;95;135m" (on 24-bit-color terminal)
+
 
 There are a bunch of other exportable functions too, mostly for converting
 between RGB and ANSI color (16/256/24bit color depth).
@@ -321,7 +328,12 @@ between RGB and ANSI color (16/256/24bit color depth).
 
 =head1 DESCRIPTION
 
-This module provides routines for dealing with ANSI colors.
+This module provides routines for dealing with ANSI colors. The two main
+functions are C<ansifg> and C<ansibg>. With those functions, you can specify
+colors in RGB and let it output the correct ANSI color escape code according to
+the color depth support of the terminal (whether 16-color, 256-color, or 24bit).
+There are other functions to convert RGB to ANSI in specific color depths, or
+reverse functions to convert from ANSI to RGB codes.
 
 Keywords: xterm, xterm-256color, terminal
 
