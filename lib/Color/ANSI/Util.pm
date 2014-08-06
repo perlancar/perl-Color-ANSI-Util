@@ -457,6 +457,6 @@ Routine to convert ANSI escape code, e.g. C<\e[31;1m> into RGB value (ff0000).
 
 L<Term::ANSIColor>
 
-http://en.wikipedia.org/wiki/ANSI_escape_code
+L<http://en.wikipedia.org/wiki/ANSI_escape_code>
 
 =cut
