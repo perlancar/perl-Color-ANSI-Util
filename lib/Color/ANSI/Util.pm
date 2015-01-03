@@ -448,11 +448,6 @@ efficient. Probably can add some threshold square distance, below which we can
 shortcut to the final answer.
 
 
-=head1 TODO
-
-Routine to convert ANSI escape code, e.g. C<\e[31;1m> into RGB value (ff0000).
-
-
 =head1 SEE ALSO
 
 L<Term::ANSIColor>
