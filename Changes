@@ -1,5 +1,11 @@
 Revision history for Color-ANSI-Util
 
+0.15    2016-10-04 (PERLANCAR)
+
+	- Observe COLOR=0 to mean disable color, disable color when
+	  COLOR_DEPTH < 16.
+
+
 0.14    2015-01-03 (PERLANCAR)
 
 	- No functional changes.
