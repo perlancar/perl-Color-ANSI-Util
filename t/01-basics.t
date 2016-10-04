@@ -68,6 +68,16 @@ subtest "color detection (ENV)" => sub {
     local $ENV{COLOR_DEPTH};
 
     $Color::ANSI::Util::_color_depth = undef;
+    {
+        local $ENV{COLOR} = 0;
+        is(ansifg("7e0102"), "");
+    }
+
+    $Color::ANSI::Util::_color_depth = undef;
+    $ENV{COLOR_DEPTH} = 0;
+    is(ansifg("7e0102"), "");
+
+    $Color::ANSI::Util::_color_depth = undef;
     $ENV{COLOR_DEPTH} = 16;
     is(ansifg("7e0102"), "\e[31m");
 

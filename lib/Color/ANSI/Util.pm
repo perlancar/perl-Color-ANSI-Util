@@ -252,6 +252,10 @@ our $_color_depth; # cache, can be set during testing
 sub _color_depth {
     unless (defined $_color_depth) {
         {
+            if (defined $ENV{COLOR} && !$ENV{COLOR}) {
+                $_color_depth = 0;
+                last;
+            }
             if (defined $ENV{COLOR_DEPTH}) {
                 $_color_depth = $ENV{COLOR_DEPTH};
                 last;
@@ -282,8 +286,10 @@ sub rgb_to_ansi_fg_code {
         rgb_to_ansi24b_fg_code($rgb);
     } elsif ($cd >= 256) {
         rgb_to_ansi256_fg_code($rgb);
-    } else {
+    } elsif ($cd >= 16) {
         rgb_to_ansi16_fg_code($rgb);
+    } else {
+        "";
     }
 }
 
@@ -436,7 +442,16 @@ Alias for rgb_to_ansi_bg_code().
 
 =head1 ENVIRONMENT
 
+=head2 COLOR => bool
+
+Can be used to explicitly disable color by setting it to 0.
+
+Observed by: ansi{fg,bg}.
+
 =head2 COLOR_DEPTH => INT
+
+Can be used to explicitly set color depth instead of trying to detect
+appropriate color depth.
 
 Observed by: ansi{fg,bg}.
 
