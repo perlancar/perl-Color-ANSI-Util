@@ -142,7 +142,7 @@ sub ansi16_to_rgb {
         } else {
             die "Invalid ANSI 16-color number '$input'";
         }
-    } elsif ($input =~ /^$/ix) {
+    } elsif ($input =~ /^(?:(bold|bright) \s )?(black|red|green|yellow|blue|magenta|cyan|white)$/ix) {
         my ($bold, $col) = (lc($1 // ""), lc($2));
         my $i;
         if ($col eq 'black') {
