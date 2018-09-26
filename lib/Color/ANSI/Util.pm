@@ -33,6 +33,8 @@ our @EXPORT_OK = qw(
                        ansifg
                        rgb_to_ansi_bg_code
                        ansibg
+
+                       ansi_reset
                );
 
 our %SPEC;
@@ -527,6 +529,8 @@ sub rgb_to_ansi_bg_code {
 
 sub ansibg { goto &rgb_to_ansi_bg_code }
 
+sub ansi_reset { "\e[0m" }
+
 1;
 # ABSTRACT: Routines for dealing with ANSI colors
 
@@ -597,6 +601,10 @@ Alias for rgb_to_ansi_fg_code().
 =head2 ansibg($rgb) => STR
 
 Alias for rgb_to_ansi_bg_code().
+
+=head2 ansi_reset
+
+Returns "\e[0m".
 
 
 =head1 ENVIRONMENT
