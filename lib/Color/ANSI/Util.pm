@@ -604,7 +604,8 @@ Alias for rgb_to_ansi_bg_code().
 
 =head2 ansi_reset
 
-Returns "\e[0m".
+Returns "\e[0m", which is the ANSI escape sequence to reset color. Normally you
+print this sequence after you print colored text.
 
 
 =head1 ENVIRONMENT
