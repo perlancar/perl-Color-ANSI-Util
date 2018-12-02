@@ -420,6 +420,10 @@ our $_color_depth; # cache, can be set during testing
 sub _color_depth {
     unless (defined $_color_depth) {
         {
+            if (exists $ENV{NO_COLOR}) {
+                $_color_depth = 0;
+                last;
+            }
             if (defined $ENV{COLOR} && !$ENV{COLOR}) {
                 $_color_depth = 0;
                 last;
@@ -609,6 +613,13 @@ print this sequence after you print colored text.
 
 
 =head1 ENVIRONMENT
+
+=head2 NO_COLOR
+
+Can be used to explicitly disable color. See L<https://no-color.org> for more
+details.
+
+Observed by: ansi{fg,bg}.
 
 =head2 COLOR => bool
 
