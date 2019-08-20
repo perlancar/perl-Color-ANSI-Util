@@ -7,6 +7,8 @@ use 5.010001;
 use strict;
 use warnings;
 
+use Color::RGB::Util qw(rgb_diff);
+
 require Exporter;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(
@@ -58,9 +60,8 @@ my %ansi16 = (
     15 => 'ffffff',
 );
 my @revansi16;
-for (sort {$a<=>$b} keys %ansi16) {
-    $ansi16{$_} =~ /(..)(..)(..)/;
-    push @revansi16, [hex($1), hex($2), hex($3), $_];
+for my $idx (sort {$a<=>$b} keys %ansi16) {
+    push @revansi16, [$ansi16{$idx}, $idx];
 }
 
 my %ansi256 = (
@@ -109,9 +110,8 @@ my %ansi256 = (
     250 => 'bcbcbc', 251 => 'c6c6c6', 252 => 'd0d0d0', 253 => 'dadada', 254 => 'e4e4e4', 255 => 'eeeeee',
 );
 my @revansi256;
-for (sort {$a<=>$b} keys %ansi256) {
-    $ansi256{$_} =~ /(..)(..)(..)/;
-    push @revansi256, [hex($1), hex($2), hex($3), $_];
+for my $idx (sort {$a<=>$b} keys %ansi256) {
+    push @revansi256, [$ansi256{$idx}, $idx];
 }
 
 $SPEC{ansi16_to_rgb} = {
@@ -174,22 +174,14 @@ sub ansi16_to_rgb {
 sub _rgb_to_indexed {
     my ($rgb, $table) = @_;
 
-    $rgb =~ /^#?([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})$/
-        or die "Invalid RGB input '$rgb'";
-    my $r = hex($1);
-    my $g = hex($2);
-    my $b = hex($3);
-
-    my ($minsqdist, $res);
+    my ($smallest_diff, $res);
     for my $e (@$table) {
-        my $sqdist =
-            abs($e->[0]-$r)**2 + abs($e->[1]-$g)**2 + abs($e->[2]-$b)**2;
+        my $diff = rgb_diff($rgb, $e->[0], 'hsv_hue1');
         # exact match, return immediately
-        return $e->[3] if $sqdist == 0;
-        if (!defined($minsqdist) || $minsqdist > $sqdist) {
-            #say "D:sqdist=$sqdist";
-            $minsqdist = $sqdist;
-            $res = $e->[3];
+        return $e->[1] if $diff == 0;
+        if (!defined($smallest_diff) || $smallest_diff > $diff) {
+            $smallest_diff = $diff;
+            $res = $e->[1];
         }
     }
     return $res;
