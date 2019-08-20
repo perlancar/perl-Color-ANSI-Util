@@ -1,3 +1,10 @@
+0.163   2019-08-20  Released-By: PERLANCAR; Urgency: medium
+
+	- Use rgb_diff() with hsv_hue1 algorithm to convert RGB 24bit to
+	  256/16 color better, by retaining more hued colors instead of
+	  turning to white/gray 'prematurely'.
+
+
 0.162   2018-12-02  Released-By: PERLANCAR
 
 	- Observe NO_COLOR (see https://no-color.org).
