@@ -1,6 +1,8 @@
 package Color::ANSI::Util;
 
+# AUTHORITY
 # DATE
+# DIST
 # VERSION
 
 use 5.010001;
@@ -525,7 +527,14 @@ sub rgb_to_ansi_bg_code {
 
 sub ansibg { goto &rgb_to_ansi_bg_code }
 
-sub ansi_reset { "\e[0m" }
+sub ansi_reset {
+    my $conditional = shift;
+    if ($conditional) {
+        my $cd = _color_depth();
+        return "" if $cd < 16;
+    }
+    "\e[0m";
+}
 
 1;
 # ABSTRACT: Routines for dealing with ANSI colors
@@ -598,10 +607,13 @@ Alias for rgb_to_ansi_fg_code().
 
 Alias for rgb_to_ansi_bg_code().
 
-=head2 ansi_reset
+=head2 ansi_reset( [ $conditional ])
 
 Returns "\e[0m", which is the ANSI escape sequence to reset color. Normally you
 print this sequence after you print colored text.
+
+If C<$conditional> is set to true, then ansi_reset() will return "" if color is
+disabled.
 
 
 =head1 ENVIRONMENT
