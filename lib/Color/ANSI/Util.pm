@@ -1,18 +1,17 @@
 package Color::ANSI::Util;
 
-# AUTHORITY
-# DATE
-# DIST
-# VERSION
-
 use 5.010001;
 use strict;
 use warnings;
 
 use Color::RGB::Util qw(rgb_diff);
+use Exporter qw(import);
 
-require Exporter;
-our @ISA       = qw(Exporter);
+# AUTHORITY
+# DATE
+# DIST
+# VERSION
+
 our @EXPORT_OK = qw(
                        ansi16_to_rgb
                        rgb_to_ansi16
