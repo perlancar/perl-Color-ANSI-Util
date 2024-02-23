@@ -433,7 +433,7 @@ sub _color_depth {
                         $_color_depth = Term::Detect::Software::detect_terminal_cached()->{color_depth};
                         last;
                     }
-                };
+                }
             }
             # simple heuristic
             if ($ENV{KONSOLE_DBUS_SERVICE}) {
