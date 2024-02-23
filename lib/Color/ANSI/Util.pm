@@ -426,11 +426,14 @@ sub _color_depth {
                 last;
             }
             if ($_use_termdetsw) {
-                eval { require Term::Detect::Software };
-                if (!$@) {
-                    $_color_depth = Term::Detect::Software::detect_terminal_cached()->{color_depth};
-                    last;
-                }
+                {
+                    local $@; local $SIG{__DIE__};
+                    eval { require Term::Detect::Software };
+                    unless ($@) {
+                        $_color_depth = Term::Detect::Software::detect_terminal_cached()->{color_depth};
+                        last;
+                    }
+                };
             }
             # simple heuristic
             if ($ENV{KONSOLE_DBUS_SERVICE}) {
